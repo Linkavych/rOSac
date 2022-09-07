@@ -15,7 +15,7 @@ relevant forensic data for further analysis.
 ```shell
 $ python3 rOSac.py --help
 ```
-[![help](images/help.jpg)]
+![help](images/help.jpg)
 
 
 ### Inspired by:
