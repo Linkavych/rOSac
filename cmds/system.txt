@@ -7,4 +7,3 @@
 /system clock print
 /system device-mode print
 /system note print
-
