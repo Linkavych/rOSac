@@ -1,4 +1,4 @@
-*.tzr.gz
+*.tar.gz
 *.pyc
 *.pub
 *.key
