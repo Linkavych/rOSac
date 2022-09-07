@@ -6,7 +6,7 @@ relevant forensic data for further analysis.
 
 ***
 
-[![rOSac](images/roac.gif)](#)
+[![rOSac](images/rosac.gif)](#)
 
 
 ### Inspired by:
