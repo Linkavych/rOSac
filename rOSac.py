@@ -32,6 +32,7 @@ def banner():
                                 routerOS Artifact Collector
                                 author: @linkavych
                                 updated: 2022-09-07
+                                version: 0.1.1
          """)
    print("-" * 120)
    print()
@@ -46,6 +47,17 @@ def get_connection(ip: str, username: str, keyfile: str):
 
     return c
 
+def get_conn_pw(ip: str, username: str,  pwd: str):
+    """
+    Establish a connection with the provided router.
+
+    This uses a password instead of a keyfile.
+
+    Returns a connection object.
+    """
+    c = Connection(ip, user=username, connect_kwargs={"password":pwd})
+
+    return c
 
 def get_commands(cfiles: list):
     """
@@ -223,10 +235,11 @@ def compress_output():
 def main(
     ip: str = typer.Option(..., help="The IP address for the targeted router."),
     username: str = typer.Option(..., help="The username for the targeted router."),
-    keyfile: str = typer.Option(..., help="The file path to where the ssh key is located."),
     cmdpath: str = typer.Option(
         ..., help="Path to location where commands files are located."
     ),
+    keyfile: str = typer.Option("", help="The file path to where the ssh key is located."),
+    password: str = typer.Option("", help="The password for use with the router."),
     get_files: bool = typer.Option(
         False, help="Download all files from target router to local disk."
     ),
@@ -246,13 +259,15 @@ def main(
     Still a work-in-progress:
 
     TODO:
-        1. keyfile made optional with choice to use a password
         2. Add ability to use a list of IP addresses
 
     """
     banner()
 
-    c = get_connection(ip, username, keyfile)
+    if password:
+        c = get_connection(ip, username, password)
+    else:
+        c = get_connection(ip, username, keyfile)
 
     cmdfiles = get_cmd_file(cmdpath)
 
