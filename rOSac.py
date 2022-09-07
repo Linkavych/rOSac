@@ -12,6 +12,7 @@ import pathlib
 import tarfile
 import shutil
 from datetime import datetime
+from time import sleep
 
 # For SSH
 from fabric import Connection
@@ -28,9 +29,12 @@ def banner():
     | | | (_) | |_| | ||  __/ |  \ \_/ /\__/ / | | | | |  | |_| | || (_| | (__| |_  | \__/\ (_) | | |  __/ (__| || (_) | |   
     |_|  \___/ \__,_|\__\___|_|   \___/\____/  \_| |_/_|   \__|_|_| \__,_|\___|\__|  \____/\___/|_|_|\___|\___|\__\___/|_|   
 
+                                routerOS Artifact Collector
                                 author: @linkavych
                                 updated: 2022-09-07
          """)
+   print("-" * 120)
+   print()
 
 def get_connection(ip: str, username: str, keyfile: str):
     """
@@ -93,7 +97,7 @@ def run_commands(connection, cmds: list):
         fn = f"{cmd}_output.txt"
         fp = p / fn
         print(
-            f"[+] Executing {len(cmds[cmd])} commands from: {cmd} on target router..."
+            f"[+] Executing {len(cmds[cmd])} commands from: {cmd}..."
         )
 
         with fp.open("w", encoding="utf-8") as f:
@@ -153,7 +157,7 @@ def download_files(connection):
 
     files = generate_files(connection)
 
-    print(f"[+] Downloading {len(files)} from target router...")
+    print(f"[+] Downloading {len(files)} files from target router...")
 
     for file in files:
         try:
@@ -172,6 +176,7 @@ def backup_router(connection):
     print("[+] Backing up the router and downloading...")
 
     connection.run("/system backup save name=rtrbackup", hide="both")
+    sleep(5)
     pathlib.Path("output/files/backup").mkdir(parents=True, exist_ok=True)
     connection.get("rtrbackup.backup", local="output/files/backup/")
     connection.run("/file remove rtrbackup.backup", hide="both")
@@ -183,10 +188,11 @@ def get_config(connection):
     """
     Make a backup of the router's configuration file and download it.
     """
-    print("[+] creating a configuration backup and downloading...")
+    print("[+] Creating a configuration backup and downloading...")
 
     pathlib.Path("output/files/config").mkdir(parents=True, exist_ok=True)
     connection.run("/export file=config", hide="both")
+    sleep(5)
     connection.get("config.rsc", local="output/files/config/")
     connection.run("/file remove config.rsc", hide="both")
 
@@ -208,6 +214,8 @@ def compress_output():
 
     # Remove file structure; leaving only compressed files
     shutil.rmtree("output/")
+
+    print(f"[+] Compressed file saved in current directory: {filename + '.tar.gz'}...")
 
     return
 
