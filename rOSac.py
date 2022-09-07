@@ -19,6 +19,18 @@ from fabric import Connection
 # CLI stuff
 import typer
 
+def banner():
+   print("""
+                     _            _____ _____    ___       _   _  __           _     _____       _ _           _             
+                    | |          |  _  /  ___|  / _ \     | | (_)/ _|         | |   /  __ \     | | |         | |            
+     _ __ ___  _   _| |_ ___ _ __| | | \ `--.  / /_\ \_ __| |_ _| |_ __ _  ___| |_  | /  \/ ___ | | | ___  ___| |_ ___  _ __ 
+    | '__/ _ \| | | | __/ _ \ '__| | | |`--. \ |  _  | '__| __| |  _/ _` |/ __| __| | |    / _ \| | |/ _ \/ __| __/ _ \| '__|
+    | | | (_) | |_| | ||  __/ |  \ \_/ /\__/ / | | | | |  | |_| | || (_| | (__| |_  | \__/\ (_) | | |  __/ (__| || (_) | |   
+    |_|  \___/ \__,_|\__\___|_|   \___/\____/  \_| |_/_|   \__|_|_| \__,_|\___|\__|  \____/\___/|_|_|\___|\___|\__\___/|_|   
+
+                                author: @linkavych
+                                updated: 2022-09-07
+         """)
 
 def get_connection(ip: str, username: str, keyfile: str):
     """
@@ -80,6 +92,10 @@ def run_commands(connection, cmds: list):
     for cmd in cmds:
         fn = f"{cmd}_output.txt"
         fp = p / fn
+        print(
+            f"[+] Executing {len(cmds[cmd])} commands from: {cmd} on target router..."
+        )
+
         with fp.open("w", encoding="utf-8") as f:
             print("#" * 40, file=f)
             print(f"{cmd.center(40)}", file=f)
@@ -87,12 +103,13 @@ def run_commands(connection, cmds: list):
             try:
                 for i in cmds[cmd]:
                     print(f"[+] Command: {i}", file=f)
-                    res = connection.run(i)
+                    res = connection.run(i, hide="both")
                     print(res, file=f)
             except:
                 continue
 
     return
+
 
 def generate_files(connection):
     """
@@ -102,12 +119,12 @@ def generate_files(connection):
 
     This will potentially miss files if they are in subfolders...TODO!
     """
-
-    results = connection.run("/file print")
-    with open('temp', 'w', encoding="utf-8") as fp:
+    print(f"[+] Gathering filenames from router...")
+    results = connection.run("/file print", hide="both")
+    with open("temp", "w", encoding="utf-8") as fp:
         print(results, file=fp)
 
-    with open('temp', 'r', encoding="utf-8") as f:
+    with open("temp", "r", encoding="utf-8") as f:
         data = f.readlines()
         data = data[4:-1]
 
@@ -121,6 +138,7 @@ def generate_files(connection):
             continue
 
     os.remove("temp")
+    print("[+] Cleaning up temporary files...")
 
     return files
 
@@ -134,6 +152,8 @@ def download_files(connection):
     pathlib.Path("output/files").mkdir(parents=True, exist_ok=True)
 
     files = generate_files(connection)
+
+    print(f"[+] Downloading {len(files)} from target router...")
 
     for file in files:
         try:
@@ -149,10 +169,12 @@ def backup_router(connection):
     Make a backup of the router for artifact collection
     Download the backup to local filesystem
     """
-    connection.run("/system backup save name=rtrbackup")
+    print("[+] Backing up the router and downloading...")
+
+    connection.run("/system backup save name=rtrbackup", hide="both")
     pathlib.Path("output/files/backup").mkdir(parents=True, exist_ok=True)
     connection.get("rtrbackup.backup", local="output/files/backup/")
-    connection.run("/file remove rtrbackup.backup")
+    connection.run("/file remove rtrbackup.backup", hide="both")
 
     return
 
@@ -161,10 +183,12 @@ def get_config(connection):
     """
     Make a backup of the router's configuration file and download it.
     """
+    print("[+] creating a configuration backup and downloading...")
+
     pathlib.Path("output/files/config").mkdir(parents=True, exist_ok=True)
-    connection.run("/export file=config")
+    connection.run("/export file=config", hide="both")
     connection.get("config.rsc", local="output/files/config/")
-    connection.run("/file remove config.rsc")
+    connection.run("/file remove config.rsc", hide="both")
 
 
 def compress_output():
@@ -174,7 +198,8 @@ def compress_output():
 
     UTC timestamp output
     """
-
+    print("[+] Compressing files...")
+    print(f"[+] Timestamp is in UTC: {datetime.utcnow()}...")
     ftime = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
     filename = "output_" + ftime
 
@@ -188,9 +213,9 @@ def compress_output():
 
 
 def main(
-    ip: str = typer.Option(...),
-    username: str = typer.Option(...),
-    keyfile: str = typer.Option(...),
+    ip: str = typer.Option(..., help="The IP address for the targeted router."),
+    username: str = typer.Option(..., help="The username for the targeted router."),
+    keyfile: str = typer.Option(..., help="The file path to where the ssh key is located."),
     cmdpath: str = typer.Option(
         ..., help="Path to location where commands files are located."
     ),
@@ -205,14 +230,20 @@ def main(
     ),
 ):
     """
-    Main function for collecting relevant data from routerOS.
-    Requires an IP address, username, and keyfile to access the router
+    routerOS Artifact Collector
+
+    Collect relevant forensic artifacts from routerOS systems. This is a live-response tool
+    and may make changes on the target system. 
+
+    Still a work-in-progress:
 
     TODO:
         1. keyfile made optional with choice to use a password
         2. Add ability to use a list of IP addresses
 
     """
+    banner()
+
     c = get_connection(ip, username, keyfile)
 
     cmdfiles = get_cmd_file(cmdpath)
