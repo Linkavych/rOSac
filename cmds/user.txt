@@ -1,0 +1,6 @@
+/user print detail
+/user settings print
+/user aaa print
+/user active print detail
+/user group print detail
+/user ssh-keys print detail

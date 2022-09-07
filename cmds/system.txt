@@ -1,0 +1,10 @@
+/system identity print
+/system resource print
+/system resource pci print
+/system resource usb print
+/system resource irq print
+/system resource cpu print
+/system clock print
+/system device-mode print
+/system note print
+
