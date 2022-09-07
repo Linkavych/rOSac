@@ -1,9 +1,14 @@
+/system clock print
+/system device-mode print
+/system history print detail without-paging
 /system identity print
-/system resource print
+/system license print
+/system note print
+/system package print detail without-paging
+/system resource print without-paging
 /system resource pci print
 /system resource usb print
 /system resource irq print
 /system resource cpu print
-/system clock print
-/system device-mode print
-/system note print
+/system scheduler print detail without-paging
+/system script print detail without-paging

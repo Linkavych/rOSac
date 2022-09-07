@@ -5,6 +5,7 @@ Hopefully useful in incident response.
 
 author: @linkavych
 date: 2022-09-07
+version: 0.1
 """
 import os
 import pathlib

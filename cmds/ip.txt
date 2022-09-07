@@ -1,0 +1,19 @@
+/ip address print detail without-paging
+/ip arp print detail without-paging
+/ip dhcp-client print detail without-paging
+/ip dhcp-relay print detail without-paging
+/ip dhcp-server print detail without-paging
+/ip dns print without-paging
+/ip dns cache print detail without-paging
+/ip dns static print detail without-paging
+/ip firewall filter print detail without-paging
+/ip firewall nat print detail without-paging
+/ip service print detail without-paging
+/ip proxy print without-paging
+/ip socks print without-paging
+/ip socks access print detail without-paging
+/ip route print detail without-paging
+/ip settings print without-paging
+/ip smb print without-paging
+/ip smb shares print detail without-paging
+/ip ssh print
