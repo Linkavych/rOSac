@@ -3,3 +3,9 @@
 *.pub
 *.key
 output*
+bin/
+include/
+lib/ 
+lib64/
+lib64
+*.cfg
